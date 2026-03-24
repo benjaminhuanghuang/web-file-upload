@@ -1,0 +1,58 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <input type="file" />
+
+    <script>
+      const inp = document.querySelector("input");
+      inp.onchange = async (e) => {
+        const file = inp.files[0];
+        if (!file) {
+          return;
+        }
+        const chunks = createChunks(file, 1024 * 1024);
+        const hashValue = await hash(chunks);
+        console.log(file);
+      };
+
+      function createChunks(file, size) {
+        const chunks = [];
+        let index = 0;
+        while (index < file.size) {
+          const chunk = file.slice(index, index + size);
+          chunks.push(chunk);
+          index += size;
+        }
+        return chunks;
+      }
+
+      // calculate the hash value of the whole file by chunks
+      // 增量计算，避免读取整个文件到内存中
+      function hash(chunks) {
+        return new Promise((resolve) => {
+          // use the SparkMD5 library to calculate the hash value of the whole file
+          const spark = new SparkMD5();
+          function _read(i) {
+            if (i >= chunks.length) {
+              console.log(spark.end());
+              return; // 读取完成
+            }
+            const blob = chunks[i];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const bytes = e.target.result;
+              spark.append(bytes);
+              _read(i + 1);
+            };
+            reader.readAsArrayBuffer(blob);
+          }
+          _read(0);
+        });
+      }
+    </script>
+  </body>
+</html>

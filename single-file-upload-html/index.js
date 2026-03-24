@@ -37,7 +37,39 @@ function cancel() {
 
 doms.cancelBtn.onclick = doms.delBtn.onclick = cancel;
 
-doms.selectFile.onchange = function () {
+// drag and drop
+doms.select.ondragenter = (e) => {
+  e.preventDefault();
+  doms.select.classList.add("dragging");
+};
+doms.select.ondragleave = (e) => {
+  e.preventDefault();
+  doms.select.classList.remove("dragging");
+};
+doms.select.ondragover = (e) => {
+  e.preventDefault();
+};
+doms.select.ondrop = (e) => {
+  e.preventDefault();
+  const files = e.dataTransfer.files;
+  if (files.length === 0) {
+    return;
+  }
+  if (files.length > 1) {
+    alert("Please drop only one file.");
+    return;
+  }
+  if (!e.dataTransfer.types.includes("Files")) {
+    alert("Please drop a valid file.");
+    return;
+  }
+
+  doms.select.classList.remove("dragging");
+  doms.selectFile.files = e.dataTransfer.files;
+  changeHandle.call(doms.selectFile);
+};
+
+function changeHandle() {
   if (this.files.length === 0) {
     return;
   }
@@ -66,7 +98,8 @@ doms.selectFile.onchange = function () {
       showArea("result");
     }
   );
-};
+}
+doms.selectFile.onchange = changeHandle();
 
 function validateFile(file) {
   const validTypes = ["image/jpeg", "image/png", "image/gif"];
@@ -83,8 +116,35 @@ function validateFile(file) {
 }
 
 function upload(file, onProgress, onFinish) {
+  const xhr = new XMLHttpRequest();
+
+  xhr.upload.onprogress = function (e) {
+    if (e.lengthComputable) {
+      const percentComplete = Math.round((e.loaded / e.total) * 100);
+      onProgress(percentComplete);
+    }
+  };
+  // when upload is complete
+  xhr.onload = function () {
+    const resp = JSON.parse(xhr.responseText);
+    onFinish(resp);
+  };
+
+  xhr.onerror = function () {
+    alert("An error occurred during the upload. Please try again.");
+    cancel();
+  };
+
+  // send file to server
+  xhr.open("POST", "http://localhost:3000/upload/single");
+  const formData = new FormData();
+  formData.append("avatar", file); // "avatar" should match the field name expected by the server
+  xhr.send(formData);
+
   // cancel function
-  return function () {};
+  return function () {
+    xhr.abort();
+  };
 }
 
 function upload_mock(file, onProgress, onFinish) {

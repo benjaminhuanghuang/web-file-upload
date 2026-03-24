@@ -15,7 +15,7 @@
 
 ## API interface design
 
-### Binary
+### multipart
 
 path: /upload/single
 method: POST
@@ -64,6 +64,33 @@ Content-Type: application/json
   "data": "iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6CAYAAACM..."
 }
 
+```
+
+### Binary
+
+path: /upload/single
+method: POST
+format: application/octet-stream
+x-ext: .jpg
+extension list : ['.jpg', '.jpeg', '.bmp', '.webp', '.gif', '.png']
+max size: 5M
+response format and content: JSON
+
+HTTP request
+
+```http
+POST /upload/single HTTP/1.1
+HOST: localhost:8080
+Content-Type: application/octet-stream
+x-ext: .jpg
+< ./file.jpg
+```
+
+```js
+xhr.open('POST', 'http://test.com:9527/upload/binary');
+xhr.setRequestHeader('content-type', 'application/octet-stream');
+xhr.setRequestHeader('x-ext', '.' + file.name.split('.').pop());
+xhr.send(file);
 ```
 
 ## Front

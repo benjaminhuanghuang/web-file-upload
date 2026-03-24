@@ -1,0 +1,25 @@
+<body>
+  <input type="file" />
+  <img class="preview" />
+  <button>生成截图后的File对象</button>
+
+  <script>
+    const inpFile = document.querySelector('input[type="file"]');
+    const img = document.querySelector(".preview");
+    const btn = document.querySelector("button");
+
+    inpFile.onchange = (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        // local preview
+        img.src = e.target.result;
+
+        // generate a new File object after screenshot
+      };
+
+      reader.readAsDataURL(file);
+    };
+  </script>
+</body>

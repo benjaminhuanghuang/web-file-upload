@@ -1,0 +1,29 @@
+.upload-select::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.upload-select input {
+  display: none;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+
+.upload-select.dragging,
+.upload-select:hover {
+  border-color: var(--primary-color);
+}
+
+.upload-select.dragging {
+  background: #cedeed;
+}
+
+.upload-progress {
+  background: #00000080;
+}
+
+.progress-bar {
+  position: absolute;
+  width: 90%;
+  height: 3px;
+}

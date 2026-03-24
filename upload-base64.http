@@ -1,0 +1,10 @@
+
+POST /upload/base64 HTTP/1.1
+HOST: localhost:8080
+Content-Type: application/json
+
+{
+  "name": "golden-gate.png",
+  "ext": ".jpg",
+  "data": "iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6CAYAAACM..."
+}

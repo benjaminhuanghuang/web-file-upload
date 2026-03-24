@@ -70,10 +70,10 @@ doms.select.ondrop = (e) => {
 };
 
 function changeHandle() {
-  if (this.files.length === 0) {
+  if (doms.selectFile.files.length === 0) {
     return;
   }
-  const file = this.files[0];
+  const file = doms.selectFile.files[0];
   if (!validateFile(file)) {
     return;
   }

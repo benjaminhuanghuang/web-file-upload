@@ -25,6 +25,18 @@ doms.select.onclick = function () {
   doms.selectFile.click();
 };
 
+let cancelUpload = null;
+function cancel() {
+  if (cancelUpload) {
+    cancelUpload();
+    cancelUpload = null;
+    showArea("select");
+    doms.selectFile.value = null;
+  }
+}
+
+doms.cancelBtn.onclick = doms.delBtn.onclick = cancel;
+
 doms.selectFile.onchange = function () {
   if (this.files.length === 0) {
     return;
@@ -40,6 +52,20 @@ doms.selectFile.onchange = function () {
   reader.onload = function (e) {
     doms.img.src = e.target.result;
   };
+  reader.readAsDataURL(file);
+
+  // upload
+  cancelUpload = upload(
+    file,
+    function (value) {
+      // onProgress
+      setProgress(value);
+    },
+    function () {
+      // onFinish
+      showArea("result");
+    }
+  );
 };
 
 function validateFile(file) {
@@ -54,4 +80,27 @@ function validateFile(file) {
     return false;
   }
   return true;
+}
+
+function upload(file, onProgress, onFinish) {
+  // cancel function
+  return function () {};
+}
+
+function upload_mock(file, onProgress, onFinish) {
+  let p = 0;
+  onProgress(p);
+  const timerId = setInterval(() => {
+    p++;
+    onProgress(p);
+    if (p === 100) {
+      onFinish("done");
+      clearInterval(timerId);
+    }
+  }, 50);
+
+  // cancel function
+  return function () {
+    clearInterval(timerId);
+  };
 }

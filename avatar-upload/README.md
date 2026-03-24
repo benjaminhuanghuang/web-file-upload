@@ -1,4 +1,4 @@
-# Avator upload
+# Avatar upload
 
 ## Support local preview
 

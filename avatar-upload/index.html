@@ -1,0 +1,61 @@
+<body>
+  <input type="file" />
+  <img class="preview" />
+  <button>生成截图后的File对象</button>
+
+  <script>
+    const inpFile = document.querySelector('input[type="file"]');
+    const img = document.querySelector(".preview");
+    const btn = document.querySelector("button");
+
+    inpFile.onchange = (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        // local preview
+        img.src = e.target.result;
+
+        // generate a new File object after screenshot
+      };
+
+      reader.readAsDataURL(file);
+    };
+
+    btn.onclick = () => {
+      // generate a new File object after screenshot
+      const cutInfo = {
+        x: 0,
+        y: 0,
+        cutWidth: 300,
+        cutHeight: 300,
+        width: 100,
+        height: 100,
+      };
+
+      const canvas = document.createElement("canvas");
+      canvas.width = cutInfo.width;
+      canvas.height = cutInfo.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(
+        img,
+        cutInfo.x,
+        cutInfo.y,
+        cutInfo.cutWidth,
+        cutInfo.cutHeight,
+        0,
+        0,
+        cutInfo.width,
+        cutInfo.height
+      );
+
+      // document.body.appendChild(canvas);
+
+      // create a new File object from the canvas
+      canvas.toBlob((blob) => {
+        const newFile = new File([blob], "avatar.png", { type: "image/png" });
+        console.log(newFile);
+      }, "image/jpeg");
+    };
+  </script>
+</body>

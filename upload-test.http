@@ -1,0 +1,11 @@
+
+POST /upload/single HTTP/1.1
+HOST: localhost:8080
+Content-Type: multipart/form-data; boundary=aaa
+
+--aaa
+Content-Disposition: form-data; name="avatar"; filename="golden-gate.png"
+Content-Type: image/png
+
+< ./golden-gate.png
+--aa--

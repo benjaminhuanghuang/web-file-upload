@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { Readable } from "stream";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { type IFile, FileModel } from "../models/File.ts";
 
 const UPLOAD_DIR = path.join(__dirname, "../uploads");
 
@@ -9,11 +11,14 @@ if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
 
+const s3Client = new S3Client({ region: process.env.AWS_REGION });
+
 export interface UploadResult {
-  type: "multipart" | "base64" | "binary";
+  type: "multipart" | "base64" | "binary" | "s3";
   originalName?: string;
   storedName: string;
-  path: string;
+  path?: string; // local path
+  url?: string; // S3 URL
 }
 
 export class UploadService {
@@ -81,6 +86,49 @@ export class UploadService {
     if (!allowed.includes(mime)) {
       throw new Error(`Unsupported MIME type: ${mime}`);
     }
+  }
+
+  async uploadToS3(
+    data: Buffer | Readable,
+    filename: string,
+    mimeType = "application/octet-stream"
+  ): Promise<UploadResult> {
+    const safeName = `${Date.now()}-${filename}`;
+
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME!,
+      Key: safeName,
+      Body: data,
+      ContentType: mimeType,
+    };
+
+    await s3Client.send(new PutObjectCommand(params));
+
+    const url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${safeName}`;
+
+    return { type: "s3", storedName: safeName, url };
+  }
+
+  /**
+   *
+   * @param base64
+   * @param filename
+   * @param mimeType
+   * @returns
+   */
+  async saveBase64ToMongo(base64: string, filename: string): Promise<IFile> {
+    // Remove possible data URL prefix
+    const base64Data = base64.replace(/^data:.+;base64,/, "");
+    const buffer = Buffer.from(base64Data, "base64");
+
+    // Save to MongoDB
+    const fileDoc = new FileModel({
+      filename,
+      data: buffer,
+    });
+
+    await fileDoc.save();
+    return fileDoc;
   }
 }
 
